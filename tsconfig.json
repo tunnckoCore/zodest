@@ -2,5 +2,5 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "exclude": ["node_modules", "**/dist/**"],
   "include": ["src/**/*.ts", "**/*.ts", "**/*.tsx", "**/*.astro", "**/*.js"],
-  "extends": ["eslint-config-tunnckocore/tsconfig.json"],
+  "extends": ["eslint-config-xaxa/tsconfig.json"],
 }
