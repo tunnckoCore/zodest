@@ -1,0 +1,28 @@
+{
+  "editor.rulers": [80, 100, 120],
+  "editor.defaultFormatter": "mattbrannon.prettiest-eslint",
+  "[javascript]": {
+    "editor.defaultFormatter": "mattbrannon.prettiest-eslint",
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "mattbrannon.prettiest-eslint",
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "mattbrannon.prettiest-eslint",
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "mattbrannon.prettiest-eslint",
+  },
+  "eslint.format.enable": true,
+  "editor.formatOnType": false,
+  "editor.codeLens": true,
+  "editor.formatOnPaste": false,
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit", // sometimes it's `always` sometimes it's `explicit`.. whatever tha fack these means, i want it constantly
+    "source.fixAll.eslint": "explicit",
+    "source.fixAll.prettier": "explicit",
+    "source.organizeImports": "explicit",
+  },
+}

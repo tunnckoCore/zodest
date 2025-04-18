@@ -1,0 +1,43 @@
+{
+  "name": "zodest",
+  "version": "0.2.0",
+  "license": "Apache-2.0",
+  "description": "Modern Zod-based CLI builder, fully type-safe, super lightweight.",
+  "author": "tunnckoCore",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tunnckoCore/zodest.git"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/types.d.ts"
+    },
+    "./config": {
+      "import": "./dist/config.js",
+      "types": "./dist/config.d.ts"
+    }
+  },
+  "files": [
+    "src",
+    "dist"
+  ],
+  "scripts": {
+    "prebuild": "bun run lint && bun run test",
+    "build": "tsup src/ --format esm --dts",
+    "lint": "bunx eslint './src/index.ts' --fix --format codeframe",
+    "prepublishOnly": "bun run build",
+    "test": "bun ./example/demo-cli.ts"
+  },
+  "dependencies": {
+    "zod": "^3.24.3"
+  },
+  "devDependencies": {
+    "eslint": "^9.24.0",
+    "eslint-config-xaxa": "*",
+    "eslint-formatter-codeframe": "^7.32.1",
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.3"
+  }
+}
