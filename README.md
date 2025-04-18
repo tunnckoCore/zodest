@@ -65,6 +65,8 @@ const config = defineConfig({
 const result = processConfig(config, process.argv.slice(2));
 
 console.log('result:', result._kind, result);
+// => result._kind == 'serve', the matching command's name
+// in `result` there's also `result.globalOptions`, and so on, all type-safe
 
 // call the command
 result.command.action(result.options, result.args);
