@@ -38,12 +38,14 @@ import { z } from 'zod';
 import { defineCommand, defineConfig, defineOptions } from 'zodest/config';
 import { processConfig } from 'zodest';
 
+const globalOptions = defineOptions(
+  z.object({
+    verbose: z.boolean().default(false),
+  }),
+);
+
 const config = defineConfig({
-  globalOptions: defineOptions(
-    z.object({
-      verbose: z.boolean().default(false),
-    }),
-  ),
+  globalOptions,
   commands: {
     serve: defineCommand({
       description: 'Start development server',
@@ -51,7 +53,7 @@ const config = defineConfig({
         z.object({
           port: z.coerce.number().min(1024).default(3000),
         }),
-        { p: 'port' }, // aliases
+        { p: 'port' }, // aliases, type-safe with the schema
       ),
       args: z.array(z.string()),
       action(options, args) {
