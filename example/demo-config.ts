@@ -1,7 +1,12 @@
+/* eslint-disable no-unused-expressions */
 import { z } from 'zod';
 
 import { defineCommand, defineConfig, defineOptions, withGlobalOptions } from '../src/config.ts';
 
+/**
+ * Global options shared across all commands.
+ * Demonstrates common CLI flags like --help, --debug, --verbose.
+ */
 const globalOptions = defineOptions(
   z.object({
     help: z.boolean().default(false),
@@ -16,6 +21,10 @@ const globalOptions = defineOptions(
   },
 );
 
+/**
+ * Example of command grouping using withGlobalOptions.
+ * Demonstrates nested commands for user management with shared global options.
+ */
 const userCommands = withGlobalOptions(globalOptions, (gopts, schema) => ({
   userAdd: defineCommand({
     description: 'Add a new user',
@@ -53,21 +62,13 @@ const userCommands = withGlobalOptions(globalOptions, (gopts, schema) => ({
   }),
 }));
 
-// // CommandsFactory<TGlobalOptions, TCommands>
-// function defineCommandGroup<
-//   TGlobalOptions extends z.ZodObject<z.ZodRawShape>,
-//   TCommands extends TypedCommandMap<TGlobalOptions>,
-// >(
-//   group: CommandsFactory<TGlobalOptions, TCommands>,
-//   globalOptions: z.infer<TGlobalOptions>,
-//   schema: TGlobalOptions
-// ): TypedCommandMap<TGlobalOptions> {
-//   return group(
-//     globalOptions as z.infer<TGlobalOptions>,
-//     schema as TGlobalOptions
-//   ) as TypedCommandMap<TGlobalOptions>;
-// }
-
+/**
+ * Main CLI configuration showcasing various command patterns:
+ * - Commands with aliases
+ * - Commands with positional arguments
+ * - Commands with custom options
+ * - Mixed command styles (direct and factory-based)
+ */
 export default defineConfig({
   globalOptions,
   //
@@ -115,9 +116,39 @@ export default defineConfig({
   //      the `defaultCommand` inference of the grouped commands,
   //      so you must use `as any` to mute TypeScript, or use one from non-grouped commands
   //
+  // globalOptions,
+  //
+  // ? NOTE: when using grouped commands (with `defineCommandsGroup`),
+  // it cannot properly infer the type of "default command",
+  // even tho it exists in the final `commands` object;
+  // ? NOTE: so in such cases, you must use `as any` to mute TypeScript
+  // defaultCommand: 'userAdd', // use `as any` only when mixing grouped commands and non-grouped ones
+  // commands: userCommands,
+  //
+
+  //
+  // defaultCommand: 'default',
+  // commands: (gopts) => ({
+  //   default: defineCommand({
+  //     description: 'Default command',
+  //     options: defineOptions(
+  //       z.object({
+  //         foo: z.string().default('bar'),
+  //       })
+  //     ),
+  //     action: (opts) => {
+  //       console.log('default command:', { gopts, opts });
+  //     },
+  //   }),
+  // }),
+  //
+  // ? NOTE: mixing grouped commands with non-grouped ones breaks
+  //      the `defaultCommand` inference of the grouped commands,
+  //      so you must use `as any` to mute TypeScript, or use one from non-grouped commands
+  //
   defaultCommand: 'build', // Or `defaultCommand: 'userAdd' as any,`
-  commands: (globalOptions) => ({
-    ...userCommands(globalOptions),
+  commands: (gOptions) => ({
+    ...userCommands(gOptions),
     serve: defineCommand({
       // The `name` field has precedence over the key, skip if you want to use the key
       // It's recommended to use object keys as names, and skip the `name` field
@@ -134,6 +165,7 @@ export default defineConfig({
       args: z.array(z.string()),
       action(options, params) {
         const [foo, bar = 'barry', qux = 'quxie'] = params;
+
         // Options is properly typed as { port: number, verbose: boolean }
         // args is properly typed as string[]
         options.port; // Number
@@ -154,7 +186,7 @@ export default defineConfig({
       args: z.number().min(1024).max(49_151).default(3000),
       options: defineOptions(z.object({})),
       action(_, [port]) {
-        console.log('port command has been called:', { globalOptions, port });
+        console.log('port command has been called:', { gOptions, port });
         port.toExponential(); // Number
       },
     }),
@@ -172,7 +204,7 @@ export default defineConfig({
       action(options) {
         options.watch; // Boolean
         options.minify; // Boolean
-        console.log('build cmd:', { options, globalOptions });
+        console.log('build cmd:', { options, gOptions });
       },
     }),
     tupled: defineCommand({
@@ -185,14 +217,14 @@ export default defineConfig({
       ),
       args: z.tuple([z.string(), z.coerce.number().default(321)]),
       // .rest(z.coerce.number().default(321)),
-      action(options, [path, number_]) {
+      action(options, [path, num]) {
         path.toUpperCase(); // String
-        number_?.toExponential(); // Number
+        num.toExponential(); // Number
         // options.quxie; // boolean
         console.log('tupled command has been called:', {
           options,
           path,
-          num: number_,
+          num,
           // Port,
         });
         // [path, port]: [string, number]

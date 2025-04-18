@@ -2,6 +2,18 @@ import { z } from 'zod';
 
 import type { DefineConfig, FoundCommandResult, ParsedFlag, TypedCommandMap } from './types.ts';
 
+/**
+ * Returns all available commands from the configuration.
+ * Useful for generating help text or command documentation.
+ *
+ * @param config - The CLI configuration object
+ * @returns Normalized commands with their names and metadata
+ * @example
+ * ```ts
+ * const commands = getCommands(config);
+ * console.log(Object.keys(commands)); // List all command names
+ * ```
+ */
 export function getCommands<
   TGlobalOptions extends z.ZodObject<z.ZodRawShape>,
   TCommands extends TypedCommandMap,
@@ -33,7 +45,20 @@ export function getCommands<
 //   options: any,
 // };
 
-// Main export function
+/**
+ * Main function to process command line arguments against a configuration.
+ * Handles command resolution, argument parsing, and validation.
+ *
+ * @param config - The CLI configuration object
+ * @param argv - Command line arguments (usually process.argv.slice(2))
+ * @returns Processed command result with validated options and arguments
+ * @throws {ZodError} If validation fails for options or arguments
+ * @example
+ * ```ts
+ * const result = processConfig(config, process.argv.slice(2));
+ * result.command.action(result.options, result.args);
+ * ```
+ */
 export function processConfig<
   TGlobalOptions extends z.ZodObject<z.ZodRawShape>,
   TCommands extends TypedCommandMap,
@@ -111,6 +136,15 @@ export function processConfig<
   return res;
 }
 
+/**
+ * Finds the end index of global options in argv array.
+ * Internal helper for parsing command line arguments.
+ *
+ * @param argv - Command line arguments
+ * @param config - CLI configuration
+ * @returns Index where global options end
+ * @internal
+ */
 export function findGlobalOptionsEnd(argv: string[], config: DefineConfig<any, any>): number {
   for (const [i, element] of argv.entries()) {
     const arg = element || '';
@@ -129,6 +163,14 @@ export function findGlobalOptionsEnd(argv: string[], config: DefineConfig<any, a
   return argv.length;
 }
 
+/**
+ * Parses a single argument into flag objects.
+ * Handles both long (--flag) and short (-f) flag formats.
+ *
+ * @param arg - Single argument string to parse
+ * @returns Array of parsed flags with keys and values
+ * @internal
+ */
 export function parseArgIntoFlags(arg: string): ParsedFlag[] {
   if (arg.startsWith('--')) {
     const flag = arg.slice(2);
@@ -152,6 +194,15 @@ export function parseArgIntoFlags(arg: string): ParsedFlag[] {
   return [];
 }
 
+/**
+ * Processes and validates global options from command line arguments.
+ *
+ * @param globalOptionsPart - Arguments containing global options
+ * @param config - CLI configuration
+ * @returns Validated global options object
+ * @throws {ZodError} If validation fails
+ * @internal
+ */
 export function processGlobalOptions<T extends z.ZodObject<z.ZodRawShape>>(
   globalOptionsPart: string[],
   config: DefineConfig<T, any>,
@@ -190,7 +241,17 @@ export function processGlobalOptions<T extends z.ZodObject<z.ZodRawShape>>(
   return globalOptions;
 }
 
-// string[], TCommands[keyof TCommands], string[], DefineConfig<TGlobalOptions, TCommands>
+/**
+ * Processes and validates command-specific options and arguments.
+ *
+ * @param commandOptionsPart - Command-specific option arguments
+ * @param command - Command definition
+ * @param cmdArgs - Command arguments
+ * @param config - CLI configuration
+ * @returns Tuple of [validated options, validated arguments]
+ * @throws {ZodError} If validation fails
+ * @internal
+ */
 export function processCommandOptions<
   TGlobalOptions extends z.ZodObject<z.ZodRawShape>,
   TCommands extends TypedCommandMap,
@@ -231,6 +292,16 @@ export function processCommandOptions<
   return [commandOptions, validatedArgs];
 }
 
+/**
+ * Validates command arguments against their schema.
+ * Supports tuple, array, and single argument validation.
+ *
+ * @param schemaArgs - Schema for arguments validation
+ * @param cmdArgs - Arguments to validate
+ * @returns Validated arguments
+ * @throws {ZodError} If validation fails
+ * @internal
+ */
 export function validateArgs(schemaArgs: any, cmdArgs: string[]): any {
   const isZodTuple = /ZodTuple/.test((schemaArgs as z.ZodTuple<any>)?._def?.typeName || '');
   const isZodArray = /ZodArray/.test((schemaArgs as z.ZodArray<any>)?._def?.typeName || '');
@@ -248,6 +319,16 @@ export function validateArgs(schemaArgs: any, cmdArgs: string[]): any {
   return schemaArgs ? [schemaArgs.parse(cmdArgs[0])] : [];
 }
 
+/**
+ * Validates command flags against their schema.
+ *
+ * @param flags - Map of flag names to values
+ * @param schema - Zod schema for validation
+ * @param context - Context for error messages
+ * @param allowUnknownFlags - Whether to allow flags not in schema
+ * @returns Array of validation issues
+ * @internal
+ */
 function validateFlags(
   flags: Map<string, any>,
   schema: z.ZodRawShape,
@@ -271,6 +352,14 @@ function validateFlags(
   return issues;
 }
 
+/**
+ * Checks if a flag is defined in global options.
+ *
+ * @param key - Flag key to check
+ * @param globalOptions - Global options configuration
+ * @returns Whether the flag is global
+ * @internal
+ */
 function isGlobalFlag(
   key: string,
   globalOptions: DefineConfig<any, any>['globalOptions'],
@@ -280,10 +369,28 @@ function isGlobalFlag(
   return key in globalSchema || key in globalAliases;
 }
 
+/**
+ * Resolves a flag alias to its full name.
+ *
+ * @param key - Flag key or alias
+ * @param aliases - Map of aliases to full names
+ * @returns Resolved flag name
+ * @internal
+ */
 function resolveAlias(key: string, aliases: Record<string, any> = {}): string {
   return aliases[key] || camelCase(key);
 }
 
+/**
+ * Finds the best matching command from command parts.
+ * Handles nested commands and aliases.
+ *
+ * @param commandParts - Parts of the command name
+ * @param commands - Available commands
+ * @param defaultCommand - Optional default command
+ * @returns Matched command result or null
+ * @internal
+ */
 export function findBestMatchingCommand<TCommands extends TypedCommandMap>(
   commandParts: string[],
   commands: TCommands,
@@ -322,6 +429,13 @@ export function findBestMatchingCommand<TCommands extends TypedCommandMap>(
   return bestMatch;
 }
 
+/**
+ * Converts a string to camelCase.
+ *
+ * @param str - String to convert
+ * @returns Camelcased string
+ * @internal
+ */
 function camelCase(str: string) {
   return str
     .split(/[ -]+/)
