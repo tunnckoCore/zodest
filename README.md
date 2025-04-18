@@ -61,8 +61,13 @@ const config = defineConfig({
   },
 });
 
-// Process CLI arguments
+// Process CLI arguments, returns the matching command
 const result = processConfig(config, process.argv.slice(2));
+
+console.log('result:', result._kind, result);
+
+// call the command
+result.command.action(result.options, result.args);
 ```
 
 ## Core Concepts
