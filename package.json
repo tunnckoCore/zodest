@@ -34,7 +34,7 @@
     "zod": "^3.24.3"
   },
   "devDependencies": {
-    "eslint": "^9.24.0",
+    "eslint": "^10.0.0",
     "eslint-config-xaxa": "*",
     "eslint-formatter-codeframe": "^7.32.1",
     "jiti": "^2.4.2",
